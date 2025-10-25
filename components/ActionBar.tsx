@@ -55,7 +55,7 @@ const ActionBar: React.FC<ActionBarProps> = ({ onDownload, shareData }) => {
     const ActionButton: React.FC<{ onClick: () => void, icon: React.ReactNode, children: React.ReactNode }> = ({ onClick, icon, children }) => (
         <button
             onClick={onClick}
-            className="w-full sm:w-auto flex-1 bg-slate-200 hover:bg-slate-300 dark:bg-slate-700/50 dark:hover:bg-slate-700/80 border border-slate-300 dark:border-slate-600 rounded-md px-4 py-2 text-slate-800 dark:text-slate-300 flex items-center justify-center gap-2 transition-colors focus:ring-2 focus:ring-cyan-500 focus:outline-none"
+            className="w-full sm:w-auto flex-1 bg-background hover:bg-muted border border-border rounded-md px-4 py-2 text-foreground flex items-center justify-center gap-2 transition-colors focus:ring-2 focus:ring-ring focus:outline-none"
         >
             {icon}
             <span>{children}</span>
@@ -63,12 +63,10 @@ const ActionBar: React.FC<ActionBarProps> = ({ onDownload, shareData }) => {
     );
 
     return (
-        <div className="bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm border border-slate-300 dark:border-slate-700 rounded-lg shadow-lg p-3">
-            <div className="flex flex-col sm:flex-row items-center gap-3">
-                <ActionButton onClick={onDownload} icon={<DownloadIcon />}>Download</ActionButton>
-                <ActionButton onClick={handleShare} icon={<ShareIcon />}>Share</ActionButton>
-                <ActionButton onClick={handlePrint} icon={<PrintIcon />}>Print</ActionButton>
-            </div>
+        <div className="flex flex-col sm:flex-row items-center gap-3">
+            <ActionButton onClick={onDownload} icon={<DownloadIcon />}>Download</ActionButton>
+            <ActionButton onClick={handleShare} icon={<ShareIcon />}>Share</ActionButton>
+            <ActionButton onClick={handlePrint} icon={<PrintIcon />}>Print</ActionButton>
         </div>
     );
 };

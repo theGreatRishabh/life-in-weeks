@@ -33,7 +33,7 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({ totalElapsed, lifeExpectanc
       const age = i;
       if (age === 0 || age % 5 === 0) {
         labels.push(
-          <div key={`y-${i}`} style={{ gridRow: i + 3, gridColumn: 2 }} className="text-right text-xs text-slate-400 dark:text-slate-500 pr-2 pt-0.5">
+          <div key={`y-${i}`} style={{ gridRow: i + 3, gridColumn: 2 }} className="text-right text-xs text-muted-foreground pr-2 pt-0.5">
             {age}
           </div>
         );
@@ -48,7 +48,7 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({ totalElapsed, lifeExpectanc
     for (let i = 1; i <= cols; i++) {
         if (i === 1 || i % interval === 0) {
             labels.push(
-                <div key={`x-${i}`} style={{ gridColumn: i + gridStartColumn -1, gridRow: 2 }} className="text-center text-xs text-slate-400 dark:text-slate-500 pb-2">
+                <div key={`x-${i}`} style={{ gridColumn: i + gridStartColumn -1, gridRow: 2 }} className="text-center text-xs text-muted-foreground pb-2">
                     {i}
                 </div>
             );
@@ -86,7 +86,7 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({ totalElapsed, lifeExpectanc
   };
 
   return (
-    <div className="bg-slate-50/50 dark:bg-slate-900/50 p-4 rounded-lg ring-1 ring-slate-200 dark:ring-slate-800">
+    <div className="p-4">
       <div 
         className="grid gap-1 items-start"
         style={{ 
@@ -100,7 +100,7 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({ totalElapsed, lifeExpectanc
               style={{ gridColumn: 1, gridRow: `3 / span ${totalRows}` }} 
               className="sticky left-0 flex items-center justify-center [writing-mode:vertical-rl] rotate-180 self-center"
             >
-              <span className="text-sm font-bold text-slate-600 dark:text-slate-400 tracking-wider">Age</span>
+              <span className="text-sm font-bold text-foreground tracking-wider">Age</span>
             </div>
           )}
 
@@ -109,7 +109,7 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({ totalElapsed, lifeExpectanc
             style={{ gridColumn: `${gridStartColumn} / span ${cols}`, gridRow: 1 }}
             className="text-center py-2"
           >
-            <span className="text-sm font-bold text-slate-600 dark:text-slate-400 tracking-wider">{timeUnit}</span>
+            <span className="text-sm font-bold text-foreground tracking-wider">{timeUnit}</span>
           </div>
 
           {/* X-axis labels */}

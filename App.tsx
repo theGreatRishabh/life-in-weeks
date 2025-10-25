@@ -2,9 +2,9 @@ import React, { useState, useEffect, useMemo } from 'react';
 import DateInput from './components/DateInput';
 import CalendarGrid from './components/CalendarGrid';
 import StatsCard from './components/StatsCard';
-import ActionBar from './components/ActionBar';
 import ThemeToggle from './components/ThemeToggle';
 import { TimeUnit } from './types';
+import PrintableReport from './components/PrintableReport';
 
 const App: React.FC = () => {
   const [birthDate, setBirthDate] = useState(() => {
@@ -86,7 +86,6 @@ const App: React.FC = () => {
     const now = new Date();
     const birth = new Date(birthDate);
 
-    // --- Accurate age calculation for display ---
     let ageYears = now.getFullYear() - birth.getFullYear();
     let ageMonths = now.getMonth() - birth.getMonth();
     let ageDays = now.getDate() - birth.getDate();
@@ -103,8 +102,6 @@ const App: React.FC = () => {
     }
 
     const ageWeeks = Math.floor(ageDays / 7);
-
-    // --- Accurate total elapsed units for grid ---
     const diffTime = now.getTime() - birth.getTime();
     const totalElapsedWeeks = Math.floor(diffTime / (1000 * 60 * 60 * 24 * 7));
     
@@ -113,9 +110,7 @@ const App: React.FC = () => {
         totalElapsedMonths--;
     }
 
-    const totalElapsedYears = ageYears; // This is by definition the number of full years passed.
-
-    // --- Total units based on life expectancy ---
+    const totalElapsedYears = ageYears;
     const totalWeeks = Math.ceil(lifeExpectancy * 52.1775);
     const totalMonths = Math.ceil(lifeExpectancy * 12);
     const totalYears = Math.ceil(lifeExpectancy);
@@ -131,76 +126,101 @@ const App: React.FC = () => {
     }
   }, [birthDate, lifeExpectancy, timeUnit]);
   
+  const percentage = totalUnits > 0 ? (totalElapsed / totalUnits) * 100 : 0;
+
   const handleDownload = () => {
-    const element = document.getElementById('print-area');
+    const element = document.getElementById('printable-content-area');
     const isDarkMode = document.documentElement.classList.contains('dark');
     if (element) {
         // @ts-ignore
-        html2canvas(element, { backgroundColor: isDarkMode ? '#0f172a' : '#ffffff' }).then(canvas => {
+        html2canvas(element, { 
+          backgroundColor: isDarkMode ? 'hsl(240, 10%, 3.9%)' : 'hsl(240, 5.2%, 96.1%)',
+          useCORS: true, 
+          allowTaint: true 
+        }).then(canvas => {
             const link = document.createElement('a');
-            link.download = 'your-life-in-weeks.png';
+            link.download = `your-life-in-${timeUnit.toLowerCase()}.png`;
             link.href = canvas.toDataURL('image/png');
             link.click();
         });
     }
   };
 
-
   return (
-    <div className="min-h-full p-4 sm:p-6 md:p-8 flex items-center justify-center">
-      <div className="w-full max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-8 relative">
-        <aside className="md:col-span-1 lg:col-span-1">
-          <DateInput
-            birthDate={birthDate}
-            setBirthDate={setBirthDate}
-            lifeExpectancy={lifeExpectancy}
-            setLifeExpectancy={setLifeExpectancy}
-            timeUnit={timeUnit}
-            setTimeUnit={setTimeUnit}
-            selectedCountry={selectedCountry}
-            setSelectedCountry={setSelectedCountry}
-          />
-        </aside>
+    <>
+      {/* Off-screen container for high-quality printing and downloading */}
+      <div className="absolute -left-[9999px] top-0" aria-hidden="true">
+        <div id="print-area" className="p-8">
+          <div id="printable-content-area">
+            <PrintableReport
+              timeUnit={timeUnit}
+              years={years}
+              months={months}
+              weeks={weeks}
+              totalElapsed={totalElapsed}
+              lifeExpectancy={lifeExpectancy}
+              percentage={percentage}
+            />
+          </div>
+        </div>
+      </div>
 
-        <main id="print-area" className="md:col-span-2 lg:col-span-3 space-y-8">
+      {/* On-screen UI */}
+      <div className="w-full p-4 md:p-8 flex-grow flex">
+        <div className="max-w-screen-2xl mx-auto w-full">
+          <header className="text-center relative mb-8 no-print">
+            <h1 className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary">
+              Your Life in {timeUnit}
+            </h1>
+            <p className="text-muted-foreground mt-2">
+              Each square represents one {timeUnit.slice(0, -1).toLowerCase()} of your life.
+            </p>
             <div className="absolute top-0 right-0">
-                <ThemeToggle theme={theme} setTheme={setTheme} />
+              <ThemeToggle theme={theme} setTheme={setTheme} />
             </div>
-            <header className="text-center">
-                <h1 className="text-4xl md:text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-500 to-teal-600 dark:from-cyan-400 dark:to-teal-500">
-                    Your Life in {timeUnit}
-                </h1>
-                <p className="text-slate-500 dark:text-slate-400 mt-2">
-                    Each square represents one {timeUnit.slice(0, -1).toLowerCase()} of your life.
-                </p>
-            </header>
+          </header>
 
-            <StatsCard
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+            {/* Left Column */}
+            <div className="lg:col-span-1 space-y-8 no-print">
+              <StatsCard
                 years={years}
                 months={months}
                 weeks={weeks}
                 lifeExpectancy={lifeExpectancy}
-                percentage={totalUnits > 0 ? (totalElapsed / totalUnits) * 100 : 0}
-            />
-            
-            <ActionBar
+                percentage={percentage}
+              />
+              <DateInput
+                birthDate={birthDate}
+                setBirthDate={setBirthDate}
+                lifeExpectancy={lifeExpectancy}
+                setLifeExpectancy={setLifeExpectancy}
+                timeUnit={timeUnit}
+                setTimeUnit={setTimeUnit}
+                selectedCountry={selectedCountry}
+                setSelectedCountry={setSelectedCountry}
                 onDownload={handleDownload}
                 shareData={{
-                    dob: birthDate.toISOString().split('T')[0],
-                    le: lifeExpectancy,
-                    unit: timeUnit,
-                    country: selectedCountry
+                  dob: birthDate.toISOString().split('T')[0],
+                  le: lifeExpectancy,
+                  unit: timeUnit,
+                  country: selectedCountry
                 }}
-            />
+              />
+            </div>
 
-            <CalendarGrid
+            {/* Right Column */}
+            <div className="lg:col-span-2 bg-card rounded-xl border border-border shadow-md overflow-hidden">
+              <CalendarGrid
                 totalElapsed={totalElapsed}
                 lifeExpectancy={lifeExpectancy}
                 timeUnit={timeUnit}
-            />
-        </main>
+              />
+            </div>
+          </div>
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 
