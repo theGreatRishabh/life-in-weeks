@@ -1,0 +1,60 @@
+import React from 'react';
+
+interface LogoProps {
+  className?: string;
+}
+
+const Logo: React.FC<LogoProps> = ({ className = 'w-10 h-10' }) => {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 512 512"
+      className={className}
+      aria-label="Life in Weeks Logo"
+    >
+      <defs>
+        <linearGradient id="logoBgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#0f172a" />
+          <stop offset="100%" stopColor="#1e293b" />
+        </linearGradient>
+        <linearGradient id="logoAccentGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#3b82f6" />
+          <stop offset="50%" stopColor="#06b6d4" />
+          <stop offset="100%" stopColor="#10b981" />
+        </linearGradient>
+        <linearGradient id="logoActiveGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#f59e0b" />
+          <stop offset="100%" stopColor="#ef4444" />
+        </linearGradient>
+        <filter id="logoGlow" x="-20%" y="-20%" width="140%" height="140%">
+          <feGaussianBlur stdDeviation="12" result="blur" />
+          <feComposite in="SourceGraphic" in2="blur" operator="over" />
+        </filter>
+      </defs>
+
+      {/* Container background */}
+      <rect x="32" y="32" width="448" height="448" rx="100" fill="url(#logoBgGrad)" stroke="#334155" strokeWidth="8" />
+
+      {/* 3x3 Grid representing Life in Weeks calendar */}
+      {/* Row 1 */}
+      <rect x="112" y="112" width="80" height="80" rx="18" fill="url(#logoAccentGrad)" opacity="0.95" />
+      <rect x="216" y="112" width="80" height="80" rx="18" fill="url(#logoAccentGrad)" opacity="0.9" />
+      <rect x="320" y="112" width="80" height="80" rx="18" fill="url(#logoAccentGrad)" opacity="0.85" />
+
+      {/* Row 2 */}
+      <rect x="112" y="216" width="80" height="80" rx="18" fill="url(#logoAccentGrad)" opacity="0.9" />
+      {/* Center highlighted current week */}
+      <rect x="216" y="216" width="80" height="80" rx="18" fill="url(#logoActiveGrad)" filter="url(#logoGlow)" />
+      <circle cx="256" cy="256" r="14" fill="#ffffff" />
+      
+      <rect x="320" y="216" width="80" height="80" rx="18" fill="#334155" opacity="0.6" />
+
+      {/* Row 3 */}
+      <rect x="112" y="320" width="80" height="80" rx="18" fill="#334155" opacity="0.5" />
+      <rect x="216" y="320" width="80" height="80" rx="18" fill="#334155" opacity="0.4" />
+      <rect x="320" y="320" width="80" height="80" rx="18" fill="#334155" opacity="0.3" />
+    </svg>
+  );
+};
+
+export default Logo;

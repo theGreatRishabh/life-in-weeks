@@ -5,6 +5,7 @@ import StatsCard from './components/StatsCard';
 import ThemeToggle from './components/ThemeToggle';
 import { TimeUnit } from './types';
 import PrintableReport from './components/PrintableReport';
+import Logo from './components/Logo';
 
 declare const html2canvas: any;
 
@@ -276,9 +277,12 @@ const App: React.FC = () => {
                   <span className="text-muted-foreground/60">&bull;</span>
                   <span className="text-muted-foreground font-normal">Bryan Braun Inspired</span>
                 </div>
-                <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight bg-gradient-to-r from-primary via-blue-500 to-secondary bg-clip-text text-transparent">
-                  Your Life in {timeUnit}
-                </h1>
+                <div className="flex items-center gap-3 justify-center sm:justify-start">
+                  <Logo className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl shadow-md shrink-0" />
+                  <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight bg-gradient-to-r from-primary via-blue-500 to-secondary bg-clip-text text-transparent">
+                    Your Life in {timeUnit}
+                  </h1>
+                </div>
                 <p className="text-xs sm:text-sm text-muted-foreground mt-1">
                   Each square represents one {timeUnit.slice(0, -1).toLowerCase()} of your life journey.
                 </p>
