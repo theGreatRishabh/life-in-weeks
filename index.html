@@ -3,11 +3,12 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Your Life in Weeks</title>
+    <title>Your Life in Weeks - Interactive Life Calendar</title>
+    <meta name="description" content="A modern, interactive life calendar to visualize your life in weeks, months, or years. Compare life expectancy and download or print your personalized timeline poster." />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
       rel="stylesheet"
     />
     <script src="https://cdn.tailwindcss.com"></script>
@@ -18,7 +19,7 @@
         theme: {
           extend: {
             fontFamily: {
-              sans: ['Inter', 'sans-serif'],
+              sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
             },
             colors: {
               border: 'hsl(var(--border))',
@@ -87,31 +88,77 @@
         --ring: 217 91% 65%;
       }
 
-      /* For Print */
+      /* Clean Screen vs Print Media Rules */
+      @media screen {
+        .print-only {
+          display: none !important;
+        }
+      }
+
       @media print {
+        @page {
+          size: portrait;
+          margin: 6mm 8mm;
+        }
+
+        *, *:before, *:after {
+          -webkit-print-color-adjust: exact !important;
+          print-color-adjust: exact !important;
+          color-adjust: exact !important;
+        }
+
+        html, body {
+          background-color: #ffffff !important;
+          color: #111827 !important;
+          margin: 0 !important;
+          padding: 0 !important;
+          width: 100% !important;
+          height: auto !important;
+          overflow: visible !important;
+        }
+
+        #root {
+          min-height: auto !important;
+          display: block !important;
+        }
+
         .no-print {
           display: none !important;
         }
-        body * {
-          visibility: hidden;
+
+        .print-only {
+          display: block !important;
+          position: static !important;
+          width: 100% !important;
+          max-width: 100% !important;
+          margin: 0 auto !important;
+          padding: 0 !important;
+          overflow: visible !important;
         }
-        #print-area, #print-area * {
-          visibility: visible;
-        }
-        #print-area {
-          position: absolute;
-          left: 0;
-          top: 0;
-          width: 100%;
-          box-shadow: none !important;
-          border: none !important;
-        }
-        body {
-          background: #fff !important;
+
+        .print-avoid-break {
+          break-inside: avoid !important;
+          page-break-inside: avoid !important;
         }
       }
+
+      /* Custom scrollbar styling for compact responsive tables */
+      .scrollbar-thin::-webkit-scrollbar {
+        height: 6px;
+        width: 6px;
+      }
+      .scrollbar-thin::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      .scrollbar-thin::-webkit-scrollbar-thumb {
+        background: hsl(var(--border));
+        border-radius: 9999px;
+      }
+      .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+        background: hsl(var(--muted-foreground) / 0.5);
+      }
     </style>
-     <script type="importmap">
+    <script type="importmap">
     {
       "imports": {
         "react/": "https://aistudiocdn.com/react@^19.2.0/",
@@ -120,9 +167,8 @@
       }
     }
     </script>
-  <link rel="stylesheet" href="/index.css">
-</head>
-  <body class="bg-background text-foreground font-sans transition-colors duration-300">
+  </head>
+  <body class="bg-background text-foreground font-sans transition-colors duration-300 antialiased selection:bg-primary/20 selection:text-primary">
     <div id="root" class="min-h-screen flex flex-col"></div>
     <script type="module" src="/index.tsx"></script>
   </body>

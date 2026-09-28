@@ -5,3 +5,8 @@ export enum WeekStatus {
 }
 
 export type TimeUnit = 'Weeks' | 'Months' | 'Years';
+
+export interface ExportOptions {
+  includeStats: boolean;
+  theme?: 'light' | 'dark';
+}

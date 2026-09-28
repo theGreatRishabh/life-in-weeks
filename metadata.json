@@ -1,5 +1,6 @@
 {
   "name": "Your Life in Weeks",
   "description": "A modern, interactive web application to visualize your life in weeks, months, or years. Compare your life expectancy with country averages, download, and share your personalized timeline.",
-  "requestFramePermissions": []
+  "requestFramePermissions": [],
+  "majorCapabilities": []
 }
