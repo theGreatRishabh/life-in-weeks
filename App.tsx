@@ -27,22 +27,41 @@ const App: React.FC = () => {
     } catch {
       // Ignore localStorage errors
     }
-    return new Date(1996, 4, 3);
+    return new Date(2000, 0, 1);
   });
 
-  const [lifeExpectancy, setLifeExpectancy] = useState<number>(() =>
-    parseFloat(_searchParams.get('le') || '80')
-  );
+  const [lifeExpectancy, setLifeExpectancy] = useState<number>(() => {
+    const le = _searchParams.get('le');
+    if (le) return parseFloat(le);
+    try {
+      const saved = localStorage.getItem('lifeExpectancy');
+      if (saved) {
+        const parsed = parseFloat(saved);
+        if (!isNaN(parsed)) return parsed;
+      }
+    } catch {}
+    return 80;
+  });
 
   const [timeUnit, setTimeUnit] = useState<TimeUnit>(() => {
     const unit = _searchParams.get('unit');
     if (unit === 'Weeks' || unit === 'Months' || unit === 'Years') return unit;
+    try {
+      const saved = localStorage.getItem('timeUnit');
+      if (saved === 'Weeks' || saved === 'Months' || saved === 'Years') return saved;
+    } catch {}
     return 'Weeks';
   });
 
-  const [selectedCountry, setSelectedCountry] = useState<string>(
-    () => _searchParams.get('country') || 'custom'
-  );
+  const [selectedCountry, setSelectedCountry] = useState<string>(() => {
+    const country = _searchParams.get('country');
+    if (country) return country;
+    try {
+      const saved = localStorage.getItem('selectedCountry');
+      if (saved) return saved;
+    } catch {}
+    return 'custom';
+  });
 
   const [theme, setTheme] = useState<'light' | 'dark'>(() => {
     try {
@@ -67,10 +86,26 @@ const App: React.FC = () => {
   useEffect(() => {
     try {
       localStorage.setItem('birthDate', birthDate.toISOString());
-    } catch {
-      // Ignore localStorage errors
-    }
+    } catch {}
   }, [birthDate]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('lifeExpectancy', lifeExpectancy.toString());
+    } catch {}
+  }, [lifeExpectancy]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('timeUnit', timeUnit);
+    } catch {}
+  }, [timeUnit]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('selectedCountry', selectedCountry);
+    } catch {}
+  }, [selectedCountry]);
 
   useEffect(() => {
     if (theme === 'dark') {
