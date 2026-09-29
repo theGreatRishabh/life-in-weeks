@@ -63,6 +63,22 @@ const App: React.FC = () => {
     return 'custom';
   });
 
+  const [isSmoker, setIsSmoker] = useState<boolean>(() => {
+    try { return localStorage.getItem('isSmoker') === 'true'; } catch {} return false;
+  });
+  const [aqi, setAqi] = useState<number | ''>(() => {
+    try { const val = localStorage.getItem('aqi'); if (val && val !== '') return parseInt(val, 10); } catch {} return 50;
+  });
+  const [dailySitting, setDailySitting] = useState<number | ''>(() => {
+    try { const val = localStorage.getItem('dailySitting'); if (val && val !== '') return parseInt(val, 10); } catch {} return 6;
+  });
+  const [exercise, setExercise] = useState<number | ''>(() => {
+    try { const val = localStorage.getItem('exercise'); if (val && val !== '') return parseInt(val, 10); } catch {} return 3;
+  });
+  const [city, setCity] = useState<string>(() => {
+    try { return localStorage.getItem('city') || ''; } catch {} return '';
+  });
+
   const [theme, setTheme] = useState<'light' | 'dark'>(() => {
     try {
       const savedTheme = localStorage.getItem('theme');
@@ -120,6 +136,43 @@ const App: React.FC = () => {
     }
   }, [theme]);
 
+  useEffect(() => { try { localStorage.setItem('isSmoker', String(isSmoker)); } catch {} }, [isSmoker]);
+  useEffect(() => { try { localStorage.setItem('aqi', String(aqi)); } catch {} }, [aqi]);
+  useEffect(() => { try { localStorage.setItem('dailySitting', String(dailySitting)); } catch {} }, [dailySitting]);
+  useEffect(() => { try { localStorage.setItem('exercise', String(exercise)); } catch {} }, [exercise]);
+  useEffect(() => { try { localStorage.setItem('city', city); } catch {} }, [city]);
+
+  const lifestyleModifier = useMemo(() => {
+    let mod = 0;
+    const aqiNum = typeof aqi === 'number' ? aqi : 0;
+    const sitNum = typeof dailySitting === 'number' ? dailySitting : 0;
+    const exNum = typeof exercise === 'number' ? exercise : 0;
+
+    if (isSmoker) mod -= 10;
+    
+    if (aqiNum > 100) {
+      if (aqiNum <= 150) mod -= 1;
+      else if (aqiNum <= 200) mod -= 2;
+      else if (aqiNum <= 300) mod -= 3;
+      else mod -= 4;
+    }
+
+    if (sitNum < 5) mod += 1;
+    else if (sitNum > 8 && sitNum <= 12) mod -= 1;
+    else if (sitNum > 12) mod -= 2;
+
+    if (exNum < 1) mod -= 1;
+    else if (exNum >= 1 && exNum < 3) mod += 1;
+    else if (exNum >= 3 && exNum < 5) mod += 2;
+    else if (exNum >= 5) mod += 3;
+    
+    return mod;
+  }, [isSmoker, aqi, dailySitting, exercise]);
+
+  const adjustedLifeExpectancy = useMemo(() => {
+    return Math.max(0, lifeExpectancy + lifestyleModifier);
+  }, [lifeExpectancy, lifestyleModifier]);
+
   const { years, months, weeks, totalElapsed, totalUnits, percentage } = useMemo(() => {
     const now = new Date();
     const birth = new Date(birthDate);
@@ -148,9 +201,9 @@ const App: React.FC = () => {
     totalElapsedMonths = Math.max(0, totalElapsedMonths);
 
     const totalElapsedYears = Math.max(0, ageYears);
-    const totalWeeks = Math.ceil(lifeExpectancy * 52.1775);
-    const totalMonths = Math.ceil(lifeExpectancy * 12);
-    const totalYears = Math.ceil(lifeExpectancy);
+    const totalWeeks = Math.ceil(adjustedLifeExpectancy * 52.1775);
+    const totalMonths = Math.ceil(adjustedLifeExpectancy * 12);
+    const totalYears = Math.ceil(adjustedLifeExpectancy);
 
     let elapsed: number;
     let units: number;
@@ -274,7 +327,7 @@ const App: React.FC = () => {
               weeks={weeks}
               totalElapsed={totalElapsed}
               totalUnits={totalUnits}
-              lifeExpectancy={lifeExpectancy}
+              lifeExpectancy={adjustedLifeExpectancy}
               percentage={percentage}
               includeStats={pendingExport.withStats}
               isForExportCanvas={true}
@@ -334,8 +387,9 @@ const App: React.FC = () => {
                 totalElapsed={totalElapsed}
                 totalUnits={totalUnits}
                 timeUnit={timeUnit}
-                lifeExpectancy={lifeExpectancy}
+                lifeExpectancy={adjustedLifeExpectancy}
                 percentage={percentage}
+                lifestyleModifier={lifestyleModifier}
               />
 
               <DateInput
@@ -343,6 +397,18 @@ const App: React.FC = () => {
                 setBirthDate={setBirthDate}
                 lifeExpectancy={lifeExpectancy}
                 setLifeExpectancy={setLifeExpectancy}
+                isSmoker={isSmoker}
+                setIsSmoker={setIsSmoker}
+                aqi={aqi}
+                setAqi={setAqi}
+                dailySitting={dailySitting}
+                setDailySitting={setDailySitting}
+                exercise={exercise}
+                setExercise={setExercise}
+                city={city}
+                setCity={setCity}
+                lifestyleModifier={lifestyleModifier}
+                adjustedLifeExpectancy={adjustedLifeExpectancy}
                 timeUnit={timeUnit}
                 setTimeUnit={setTimeUnit}
                 selectedCountry={selectedCountry}
@@ -377,7 +443,7 @@ const App: React.FC = () => {
 
               <CalendarGrid
                 totalElapsed={totalElapsed}
-                lifeExpectancy={lifeExpectancy}
+                lifeExpectancy={adjustedLifeExpectancy}
                 timeUnit={timeUnit}
               />
             </section>

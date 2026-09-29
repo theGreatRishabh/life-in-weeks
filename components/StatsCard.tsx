@@ -10,6 +10,7 @@ interface StatsCardProps {
   timeUnit: TimeUnit;
   lifeExpectancy: number;
   percentage: number;
+  lifestyleModifier?: number;
 }
 
 const StatsCard: React.FC<StatsCardProps> = ({
@@ -21,6 +22,7 @@ const StatsCard: React.FC<StatsCardProps> = ({
   timeUnit,
   lifeExpectancy,
   percentage,
+  lifestyleModifier = 0,
 }) => {
   const radius = 46;
   const circumference = 2 * Math.PI * radius;
@@ -80,6 +82,12 @@ const StatsCard: React.FC<StatsCardProps> = ({
             Based on an expected lifespan of{' '}
             <span className="font-semibold text-foreground">{lifeExpectancy.toFixed(1)}</span> years.
           </p>
+
+          {lifestyleModifier !== 0 && (
+            <p className={`text-xs sm:text-sm font-semibold ${lifestyleModifier > 0 ? 'text-green-500' : 'text-red-500'}`}>
+              (Includes {lifestyleModifier > 0 ? '+' : ''}{lifestyleModifier} years from lifestyle factors)
+            </p>
+          )}
 
           {/* Quick Metrics Bar */}
           <div className="grid grid-cols-2 gap-2 pt-1">

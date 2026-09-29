@@ -18,6 +18,18 @@ interface DateInputProps {
   includeStats: boolean;
   setIncludeStats: (value: boolean) => void;
   isDownloading?: boolean;
+  isSmoker: boolean;
+  setIsSmoker: (val: boolean) => void;
+  aqi: number | '';
+  setAqi: (val: number | '') => void;
+  dailySitting: number | '';
+  setDailySitting: (val: number | '') => void;
+  exercise: number | '';
+  setExercise: (val: number | '') => void;
+  city: string;
+  setCity: (val: string) => void;
+  lifestyleModifier: number;
+  adjustedLifeExpectancy: number;
 }
 
 const MONTHS = [
@@ -46,6 +58,18 @@ const DateInput: React.FC<DateInputProps> = ({
   includeStats,
   setIncludeStats,
   isDownloading = false,
+  isSmoker,
+  setIsSmoker,
+  aqi,
+  setAqi,
+  dailySitting,
+  setDailySitting,
+  exercise,
+  setExercise,
+  city,
+  setCity,
+  lifestyleModifier,
+  adjustedLifeExpectancy,
 }) => {
   const [month, setMonth] = useState(birthDate.getMonth());
   const [day, setDay] = useState(birthDate.getDate());
@@ -55,6 +79,9 @@ const DateInput: React.FC<DateInputProps> = ({
   const [isLoadingExpectancy, setIsLoadingExpectancy] = useState(false);
   const [sourceYear, setSourceYear] = useState<string | null>(null);
   const [customLifeExpectancy, setCustomLifeExpectancy] = useState(lifeExpectancy);
+
+  const [availableStates, setAvailableStates] = useState<string[]>([]);
+  const [isLoadingStates, setIsLoadingStates] = useState(false);
 
   // Sync state if birthDate prop changes externally (e.g. URL query params)
   useEffect(() => {
@@ -110,6 +137,37 @@ const DateInput: React.FC<DateInputProps> = ({
       });
   }, []);
 
+  useEffect(() => {
+    if (!selectedCountry || selectedCountry === 'custom' || selectedCountry === 'WLD') {
+      setAvailableStates([]);
+      return;
+    }
+    const countryObj = countries.find(c => c.id === selectedCountry);
+    if (!countryObj) {
+      setAvailableStates([]);
+      return;
+    }
+    
+    setIsLoadingStates(true);
+    fetch('https://countriesnow.space/api/v0.1/countries/states', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ country: countryObj.name })
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data && !data.error && data.data && data.data.states) {
+        setAvailableStates(data.data.states.map((s: any) => s.name));
+      } else {
+        setAvailableStates([]);
+      }
+    })
+    .catch(() => {
+      setAvailableStates([]);
+    })
+    .finally(() => setIsLoadingStates(false));
+  }, [selectedCountry, countries]);
+
   const fetchLifeExpectancy = useCallback(
     (countryCode: string) => {
       if (countryCode === 'custom') {
@@ -161,6 +219,24 @@ const DateInput: React.FC<DateInputProps> = ({
     if (!isNaN(value)) {
       setCustomLifeExpectancy(value);
       if (selectedCountry === 'custom') setLifeExpectancy(value);
+    }
+  };
+
+  const fetchAqiForLocation = async (loc: string) => {
+    if (!loc.trim()) return;
+    try {
+      const geoRes = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(loc)}&count=1`);
+      const geoData = await geoRes.json();
+      if (geoData.results && geoData.results.length > 0) {
+        const { latitude, longitude } = geoData.results[0];
+        const aqiRes = await fetch(`https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${latitude}&longitude=${longitude}&current=us_aqi`);
+        const aqiData = await aqiRes.json();
+        if (aqiData.current && aqiData.current.us_aqi !== undefined) {
+          setAqi(aqiData.current.us_aqi);
+        }
+      }
+    } catch (e) {
+      console.error('Failed to fetch AQI:', e);
     }
   };
 
@@ -303,11 +379,114 @@ const DateInput: React.FC<DateInputProps> = ({
             <p className="text-[11px] text-muted-foreground mt-1 min-h-[16px]">
               {isLoadingExpectancy ? 'Fetching latest data...' : sourceYear || 'Calculated benchmark'}
             </p>
+            {lifestyleModifier !== 0 && (
+              <p className={`text-[11px] font-bold mt-1 ${lifestyleModifier > 0 ? 'text-green-500' : 'text-red-500'}`}>
+                Adjusted: {adjustedLifeExpectancy} yrs
+              </p>
+            )}
           </div>
         </div>
       </div>
 
-      {/* ── Row 2: View Calendar As — full width ── */}
+      {/* ── Row 2: Lifestyle Factors ── */}
+      <div className="space-y-3">
+        <div className="flex items-center gap-2 mb-2">
+          <span className="p-1 rounded-md bg-green-500/10 text-green-500">
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+            </svg>
+          </span>
+          <h2 className="text-sm font-bold text-foreground tracking-tight">Lifestyle Factors</h2>
+        </div>
+
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className="block text-[11px] font-semibold text-foreground/80 mb-1">Do you smoke?</label>
+            <div className="relative">
+              <select
+                value={isSmoker ? 'yes' : 'no'}
+                onChange={e => setIsSmoker(e.target.value === 'yes')}
+                className={`${sel} appearance-none pr-7 font-medium`}
+              >
+                <option value="no">No</option>
+                <option value="yes">Yes</option>
+              </select>
+              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-muted-foreground">
+                <ChevronDown />
+              </div>
+            </div>
+          </div>
+          <div>
+            <label className="block text-[11px] font-semibold text-foreground/80 mb-1">State / AQI</label>
+            <div className="flex gap-2">
+              {availableStates.length > 0 ? (
+                <div className="relative flex-1">
+                  <select
+                    value={city}
+                    onChange={e => {
+                      setCity(e.target.value);
+                      fetchAqiForLocation(e.target.value);
+                    }}
+                    className={`${sel} appearance-none pr-6 font-medium h-full w-full`}
+                  >
+                    <option value="">Select State</option>
+                    {availableStates.map(s => (
+                      <option key={s} value={s}>{s}</option>
+                    ))}
+                  </select>
+                  <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-1.5 text-muted-foreground">
+                    <ChevronDown className="h-3.5 w-3.5" />
+                  </div>
+                </div>
+              ) : (
+                <input
+                  type="text"
+                  value={city}
+                  onChange={e => setCity(e.target.value)}
+                  onBlur={() => fetchAqiForLocation(city)}
+                  placeholder={isLoadingStates ? "Loading states..." : "State/City"}
+                  disabled={isLoadingStates}
+                  className={`${sel} font-medium flex-1`}
+                />
+              )}
+              <input
+                type="number"
+                value={aqi}
+                onChange={e => setAqi(e.target.value === '' ? '' : parseInt(e.target.value))}
+                min="0" max="500"
+                placeholder="AQI"
+                className={`${sel} font-medium w-16 text-center`}
+              />
+            </div>
+          </div>
+          <div>
+            <label className="block text-[11px] font-semibold text-foreground/80 mb-1">Daily Sitting (hrs)</label>
+            <input
+              type="number"
+              value={dailySitting}
+              onChange={e => setDailySitting(e.target.value === '' ? '' : parseInt(e.target.value))}
+              min="0" max="24"
+              className={`${sel} font-medium`}
+            />
+          </div>
+          <div>
+            <label className="block text-[11px] font-semibold text-foreground/80 mb-1">Weekly Exercise (hrs)</label>
+            <input
+              type="number"
+              value={exercise}
+              onChange={e => setExercise(e.target.value === '' ? '' : parseInt(e.target.value))}
+              min="0" max="100"
+              className={`${sel} font-medium`}
+            />
+          </div>
+        </div>
+        <p className="text-[10px] text-muted-foreground mt-2 italic border-t border-border/50 pt-2">
+          Disclaimer: Lifestyle impact values are estimates based on representative data from the World Health Organization (WHO) and CDC. They are generalized heuristics and not medical advice. AQI fetching uses Open-Meteo for proxy yearly averages.
+        </p>
+      </div>
+
+      {/* ── Row 3: View Calendar As — full width ── */}
       <div>
         <label htmlFor="view-as" className="block text-xs font-semibold text-foreground/80 mb-1.5">
           View Calendar As
