@@ -94,13 +94,13 @@ const StatsCard: React.FC<StatsCardProps> = ({
             <div className="bg-muted/40 rounded-lg p-2 text-center sm:text-left border border-border/50">
               <span className="block text-[10px] text-muted-foreground font-semibold uppercase">Lived</span>
               <span className="text-xs sm:text-sm font-bold text-foreground">
-                {totalElapsed.toLocaleString()} {timeUnit.toLowerCase()}
+                {totalElapsed.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 })} {timeUnit.toLowerCase()}
               </span>
             </div>
             <div className="bg-muted/40 rounded-lg p-2 text-center sm:text-left border border-border/50">
               <span className="block text-[10px] text-muted-foreground font-semibold uppercase">Remaining</span>
               <span className="text-xs sm:text-sm font-bold text-foreground">
-                {remainingUnits.toLocaleString()} {timeUnit.toLowerCase()}
+                {remainingUnits.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 })} {timeUnit.toLowerCase()}
               </span>
             </div>
           </div>

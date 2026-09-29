@@ -86,8 +86,9 @@ const DOMCalendarGrid: React.FC<{
     const grid = [];
     for (let i = 0; i < total; i++) {
       let status: WeekStatus;
-      if (i < totalElapsed) status = WeekStatus.Past;
-      else if (i === totalElapsed) status = WeekStatus.Present;
+      const flooredElapsed = Math.floor(totalElapsed);
+      if (i < flooredElapsed) status = WeekStatus.Past;
+      else if (i === flooredElapsed) status = WeekStatus.Present;
       else status = WeekStatus.Future;
 
       const row = Math.floor(i / cols) + 3;
@@ -218,10 +219,11 @@ const CanvasCalendarGrid: React.FC<{
       const y = row * (cellSize + gap);
       const isHover  = i === hoveredIdx;
       const isBeyond = i >= expectancyTotal;
+      const flooredElapsed = Math.floor(totalElapsed);
 
       let color: string;
-      if (i < totalElapsed)      color = isHover ? colorHoverPast   : colorPast;
-      else if (i === totalElapsed) color = colorPresent; // CSS pulse overlay on top
+      if (i < flooredElapsed)      color = isHover ? colorHoverPast   : colorPast;
+      else if (i === flooredElapsed) color = colorPresent; // CSS pulse overlay on top
       else if (isBeyond)         color = colorBeyond;
       else                       color = isHover ? colorHoverFuture : colorFuture;
 
@@ -235,7 +237,7 @@ const CanvasCalendarGrid: React.FC<{
       }
 
       // Draw a subtle border for future / beyond cells
-      if (i >= totalElapsed && i !== totalElapsed) {
+      if (i >= flooredElapsed && i !== flooredElapsed) {
         ctx.strokeStyle = colorBorder;
         ctx.lineWidth = 0.5;
         if (r > 0 && (ctx as any).roundRect) {

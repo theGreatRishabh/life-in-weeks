@@ -194,17 +194,13 @@ const App: React.FC = () => {
 
     const ageWeeks = Math.floor(ageDays / 7);
     const diffTime = now.getTime() - birth.getTime();
-    const totalElapsedWeeks = Math.max(0, Math.floor(diffTime / (1000 * 60 * 60 * 24 * 7)));
-
-    let totalElapsedMonths =
-      (now.getFullYear() - birth.getFullYear()) * 12 + (now.getMonth() - birth.getMonth());
-    if (now.getDate() < birth.getDate()) totalElapsedMonths--;
-    totalElapsedMonths = Math.max(0, totalElapsedMonths);
-
-    const totalElapsedYears = Math.max(0, ageYears);
-    const totalWeeks = Math.ceil(adjustedLifeExpectancy * 52.1775);
-    const totalMonths = Math.ceil(adjustedLifeExpectancy * 12);
-    const totalYears = Math.ceil(adjustedLifeExpectancy);
+    const exactElapsedYears = diffTime / (1000 * 60 * 60 * 24 * 365.2425);
+    const totalElapsedWeeks = Math.max(0, diffTime / (1000 * 60 * 60 * 24 * 7));
+    const totalElapsedMonths = Math.max(0, exactElapsedYears * 12);
+    const totalElapsedYears = Math.max(0, exactElapsedYears);
+    const totalWeeks = adjustedLifeExpectancy * 52.1775;
+    const totalMonths = adjustedLifeExpectancy * 12;
+    const totalYears = adjustedLifeExpectancy;
 
     let elapsed: number;
     let units: number;
@@ -231,7 +227,7 @@ const App: React.FC = () => {
       totalUnits: units,
       percentage: units > 0 ? (elapsed / units) * 100 : 0,
     };
-  }, [birthDate, lifeExpectancy, timeUnit]);
+  }, [birthDate, lifeExpectancy, timeUnit, adjustedLifeExpectancy]);
 
   // ─── Download: lazy-render export container, capture via dynamic import ──
   const handleDownload = useCallback(
@@ -434,7 +430,7 @@ const App: React.FC = () => {
                 <div className="flex items-center gap-2">
                   <h2 className="text-sm font-bold text-card-foreground">Life Grid</h2>
                   <span className="text-xs text-muted-foreground font-mono">
-                    ({totalElapsed.toLocaleString()} / {totalUnits.toLocaleString()} {timeUnit.toLowerCase()})
+                    ({totalElapsed.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 })} / {totalUnits.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 })} {timeUnit.toLowerCase()})
                   </span>
                 </div>
                 <span className="text-[11px] text-muted-foreground font-medium">
