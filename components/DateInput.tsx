@@ -25,6 +25,12 @@ const MONTHS = [
   'July', 'August', 'September', 'October', 'November', 'December'
 ];
 
+const ChevronDown = ({ className = 'h-4 w-4' }: { className?: string }) => (
+  <svg className={className} viewBox="0 0 20 20" fill="currentColor">
+    <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+  </svg>
+);
+
 const DateInput: React.FC<DateInputProps> = ({
   birthDate,
   setBirthDate,
@@ -90,21 +96,11 @@ const DateInput: React.FC<DateInputProps> = ({
               expectancy: 75.0,
             }));
 
-          // Merge with popular countries, avoiding duplicates
           const seen = new Set<string>();
           const merged: CountryInfo[] = [];
 
-          POPULAR_COUNTRIES.forEach(c => {
-            seen.add(c.id);
-            merged.push(c);
-          });
-
-          apiCountries.forEach(c => {
-            if (!seen.has(c.id)) {
-              seen.add(c.id);
-              merged.push(c);
-            }
-          });
+          POPULAR_COUNTRIES.forEach(c => { seen.add(c.id); merged.push(c); });
+          apiCountries.forEach(c => { if (!seen.has(c.id)) { seen.add(c.id); merged.push(c); } });
 
           setCountries(merged);
         }
@@ -123,7 +119,6 @@ const DateInput: React.FC<DateInputProps> = ({
         return;
       }
 
-      // Check if we have preloaded expectancy
       const found = POPULAR_COUNTRIES.find(c => c.id === countryCode);
       if (found && found.expectancy) {
         setLifeExpectancy(found.expectancy);
@@ -148,11 +143,7 @@ const DateInput: React.FC<DateInputProps> = ({
           }
         })
         .catch(() => {
-          if (found) {
-            setSourceYear('Benchmark data');
-          } else {
-            setSourceYear(null);
-          }
+          setSourceYear(found ? 'Benchmark data' : null);
         })
         .finally(() => setIsLoadingExpectancy(false));
     },
@@ -162,33 +153,33 @@ const DateInput: React.FC<DateInputProps> = ({
   const handleCountryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const code = e.target.value;
     setSelectedCountry(code);
-    if (code !== 'custom') {
-      fetchLifeExpectancy(code);
-    }
+    if (code !== 'custom') fetchLifeExpectancy(code);
   };
 
   const handleCustomLEChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = parseFloat(e.target.value);
     if (!isNaN(value)) {
       setCustomLifeExpectancy(value);
-      if (selectedCountry === 'custom') {
-        setLifeExpectancy(value);
-      }
+      if (selectedCountry === 'custom') setLifeExpectancy(value);
     }
   };
 
-  const baseInputStyles =
+  const sel =
     'w-full bg-background border border-border rounded-lg p-2 text-foreground focus:ring-2 focus:ring-ring focus:border-ring outline-none transition-all placeholder:text-muted-foreground text-xs sm:text-sm';
 
   return (
-    <div className="bg-card border border-border rounded-xl shadow-md p-4 sm:p-6 space-y-6">
+    <div className="bg-card border border-border rounded-xl shadow-md p-4 sm:p-5 space-y-4">
+
+      {/* ── Row 1: Two columns ── */}
       <div className="grid grid-cols-2 gap-4">
-        {/* Your Details */}
-        <div className="space-y-3.5">
+
+        {/* Left — Your Details */}
+        <div className="space-y-3">
           <div className="flex items-center gap-2">
             <span className="p-1 rounded-md bg-primary/10 text-primary">
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                  d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
               </svg>
             </span>
             <h2 className="text-sm font-bold text-foreground tracking-tight">Your Details</h2>
@@ -198,12 +189,13 @@ const DateInput: React.FC<DateInputProps> = ({
             <label className="block text-xs font-semibold text-foreground/80 mb-1.5">
               Date of Birth
             </label>
-            {/* Month — full width so it never truncates */}
+
+            {/* Month — full column width, no truncation */}
             <div className="relative mb-1.5">
               <select
                 value={month}
                 onChange={e => setMonth(parseInt(e.target.value, 10))}
-                className={`${baseInputStyles} appearance-none pr-6 font-medium`}
+                className={`${sel} appearance-none pr-6 font-medium`}
                 aria-label="Birth Month"
               >
                 {MONTHS.map((m, i) => (
@@ -211,22 +203,20 @@ const DateInput: React.FC<DateInputProps> = ({
                 ))}
               </select>
               <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-1.5 text-muted-foreground">
-                <svg className="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
-                </svg>
+                <ChevronDown className="h-3.5 w-3.5" />
               </div>
             </div>
+
             {/* Day + Year side by side */}
             <div className="grid grid-cols-2 gap-1.5">
               <input
                 type="number"
                 value={day}
                 onChange={e => setDay(Math.max(1, Math.min(31, parseInt(e.target.value, 10) || 1)))}
-                min="1"
-                max="31"
-                aria-label="Birth Day"
+                min="1" max="31"
                 placeholder="Day"
-                className={`${baseInputStyles} text-center font-medium`}
+                aria-label="Birth Day"
+                className={`${sel} text-center font-medium`}
               />
               <input
                 type="number"
@@ -234,43 +224,21 @@ const DateInput: React.FC<DateInputProps> = ({
                 onChange={e => setYear(parseInt(e.target.value, 10) || new Date().getFullYear())}
                 min="1900"
                 max={new Date().getFullYear()}
-                aria-label="Birth Year"
                 placeholder="Year"
-                className={`${baseInputStyles} text-center font-medium`}
+                aria-label="Birth Year"
+                className={`${sel} text-center font-medium`}
               />
-            </div>
-          </div>
-
-          <div>
-            <label htmlFor="view-as" className="block text-xs font-semibold text-foreground/80 mb-1.5">
-              View Calendar As
-            </label>
-            <div className="relative">
-              <select
-                id="view-as"
-                value={timeUnit}
-                onChange={e => setTimeUnit(e.target.value as TimeUnit)}
-                className={`${baseInputStyles} appearance-none pr-7 font-medium`}
-              >
-                <option value="Weeks">Weeks (52 per year)</option>
-                <option value="Months">Months (12 per year)</option>
-                <option value="Years">Years (1 per year)</option>
-              </select>
-              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-muted-foreground">
-                <svg className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
-                </svg>
-              </div>
             </div>
           </div>
         </div>
 
-        {/* Life Expectancy */}
-        <div className="space-y-3.5">
+        {/* Right — Life Expectancy */}
+        <div className="space-y-3">
           <div className="flex items-center gap-2">
             <span className="p-1 rounded-md bg-secondary/10 text-secondary">
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                  d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </span>
             <h2 className="text-sm font-bold text-foreground tracking-tight">Life Expectancy</h2>
@@ -278,32 +246,28 @@ const DateInput: React.FC<DateInputProps> = ({
 
           <div>
             <label htmlFor="based-on" className="block text-xs font-semibold text-foreground/80 mb-1.5">
-              Based On Country Average
+              Country Average
             </label>
             <div className="relative">
               <select
                 id="based-on"
                 value={selectedCountry}
                 onChange={handleCountryChange}
-                className={`${baseInputStyles} appearance-none pr-7 font-medium`}
+                className={`${sel} appearance-none pr-7 font-medium`}
               >
                 {countries.map(c => (
-                  <option key={c.id} value={c.id}>
-                    {c.name}
-                  </option>
+                  <option key={c.id} value={c.id}>{c.name}</option>
                 ))}
               </select>
               <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-muted-foreground">
-                <svg className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
-                </svg>
+                <ChevronDown />
               </div>
             </div>
           </div>
 
           <div>
             <label htmlFor="expected-age" className="block text-xs font-semibold text-foreground/80 mb-1.5">
-              Target Expected Age (Years)
+              Target Age (yrs)
             </label>
             <div className="relative">
               <input
@@ -312,20 +276,16 @@ const DateInput: React.FC<DateInputProps> = ({
                 value={customLifeExpectancy}
                 onChange={handleCustomLEChange}
                 onBlur={() => setLifeExpectancy(customLifeExpectancy)}
-                step="0.5"
-                min="10"
-                max="125"
+                step="0.5" min="10" max="125"
                 disabled={selectedCountry !== 'custom'}
-                className={`${baseInputStyles} font-bold text-center ${
+                className={`${sel} font-bold text-center ${
                   selectedCountry !== 'custom' ? 'bg-muted/40 cursor-not-allowed text-muted-foreground' : ''
                 }`}
               />
               {selectedCountry !== 'custom' && (
                 <button
                   type="button"
-                  onClick={() => {
-                    setSelectedCountry('custom');
-                  }}
+                  onClick={() => setSelectedCountry('custom')}
                   className="absolute right-2 top-1/2 -translate-y-1/2 text-[11px] font-semibold text-primary hover:underline"
                 >
                   Edit
@@ -339,8 +299,30 @@ const DateInput: React.FC<DateInputProps> = ({
         </div>
       </div>
 
-      {/* Export & Actions Section */}
-      <div className="pt-4 border-t border-border">
+      {/* ── Row 2: View Calendar As — full width ── */}
+      <div>
+        <label htmlFor="view-as" className="block text-xs font-semibold text-foreground/80 mb-1.5">
+          View Calendar As
+        </label>
+        <div className="relative">
+          <select
+            id="view-as"
+            value={timeUnit}
+            onChange={e => setTimeUnit(e.target.value as TimeUnit)}
+            className={`${sel} appearance-none pr-7 font-medium`}
+          >
+            <option value="Weeks">Weeks (52 per year)</option>
+            <option value="Months">Months (12 per year)</option>
+            <option value="Years">Years (1 per year)</option>
+          </select>
+          <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-muted-foreground">
+            <ChevronDown />
+          </div>
+        </div>
+      </div>
+
+      {/* ── Row 3: Actions ── */}
+      <div className="pt-2 border-t border-border">
         <ActionBar
           onDownload={onDownload}
           onPrint={onPrint}
