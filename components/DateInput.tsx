@@ -78,7 +78,7 @@ const DateInput: React.FC<DateInputProps> = ({
   const [countries, setCountries] = useState<CountryInfo[]>(POPULAR_COUNTRIES);
   const [isLoadingExpectancy, setIsLoadingExpectancy] = useState(false);
   const [sourceYear, setSourceYear] = useState<string | null>(null);
-  const [customLifeExpectancy, setCustomLifeExpectancy] = useState(lifeExpectancy);
+  const [customLifeExpectancy, setCustomLifeExpectancy] = useState<number | string>(lifeExpectancy);
 
   const [availableStates, setAvailableStates] = useState<string[]>([]);
   const [isLoadingStates, setIsLoadingStates] = useState(false);
@@ -215,7 +215,12 @@ const DateInput: React.FC<DateInputProps> = ({
   };
 
   const handleCustomLEChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = parseFloat(e.target.value);
+    const val = e.target.value;
+    if (val === '') {
+      setCustomLifeExpectancy('');
+      return;
+    }
+    const value = parseFloat(val);
     if (!isNaN(value)) {
       setCustomLifeExpectancy(value);
       if (selectedCountry === 'custom') setLifeExpectancy(value);
