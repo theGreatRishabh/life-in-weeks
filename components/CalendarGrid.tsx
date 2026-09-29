@@ -314,7 +314,7 @@ const CanvasCalendarGrid: React.FC<{
   const X_LABEL_H = 18;
 
   return (
-    <div className="w-full overflow-x-auto scrollbar-thin overscroll-contain">
+    <div className="w-full overflow-x-auto scrollbar-thin" style={{ WebkitOverflowScrolling: 'touch' }}>
       <div className="flex items-start" style={{ minWidth: canvasW + Y_TITLE_W + Y_LABEL_W + 4 }}>
 
         {/* Y-axis title (rotated) */}
@@ -369,7 +369,14 @@ const CanvasCalendarGrid: React.FC<{
           <div className="relative" style={{ width: canvasW, height: canvasH }}>
             <canvas
               ref={canvasRef}
-              style={{ width: canvasW, height: canvasH, display: 'block', cursor: 'crosshair' }}
+              style={{
+                width: canvasW,
+                height: canvasH,
+                display: 'block',
+                cursor: 'crosshair',
+                // Let touch events pass through for native scroll — mouse hover still works
+                touchAction: 'pan-x pan-y',
+              }}
               onMouseMove={handleMouseMove}
               onMouseLeave={handleMouseLeave}
             />
