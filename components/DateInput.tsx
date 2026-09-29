@@ -430,7 +430,7 @@ const DateInput: React.FC<DateInputProps> = ({
                     }}
                     className={`${sel} appearance-none pr-6 font-medium h-full w-full`}
                   >
-                    <option value="">Select State</option>
+                    <option value="">City</option>
                     {availableStates.map(s => (
                       <option key={s} value={s}>{s}</option>
                     ))}
@@ -445,7 +445,7 @@ const DateInput: React.FC<DateInputProps> = ({
                   value={city}
                   onChange={e => setCity(e.target.value)}
                   onBlur={() => fetchAqiForLocation(city)}
-                  placeholder={isLoadingStates ? "Loading states..." : "State/City"}
+                  placeholder={isLoadingStates ? "Loading..." : "City"}
                   disabled={isLoadingStates}
                   className={`${sel} font-medium flex-1`}
                 />
@@ -456,7 +456,7 @@ const DateInput: React.FC<DateInputProps> = ({
                 onChange={e => setAqi(e.target.value === '' ? '' : parseInt(e.target.value))}
                 min="0" max="500"
                 placeholder="AQI"
-                className={`${sel} font-medium w-16 text-center`}
+                className={`${sel.replace('w-full', 'w-16')} font-medium text-center`}
               />
             </div>
           </div>

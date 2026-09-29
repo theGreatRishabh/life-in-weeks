@@ -18,7 +18,6 @@ const ActionBar: React.FC<ActionBarProps> = ({
   isDownloading = false,
 }) => {
   const [toastMessage, setToastMessage] = useState<string | null>(null);
-  const [showDownloadMenu, setShowDownloadMenu] = useState(false);
 
   const showToast = (message: string) => {
     setToastMessage(message);
@@ -82,45 +81,6 @@ const ActionBar: React.FC<ActionBarProps> = ({
         </div>
       )}
 
-      {/* Option to include/exclude stats in export */}
-      <div className="p-3 bg-muted/40 hover:bg-muted/60 transition-colors rounded-xl border border-border flex items-center justify-between gap-3">
-        <div className="flex items-start gap-2.5">
-          <div className="p-1.5 rounded-md bg-primary/10 text-primary mt-0.5">
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-            </svg>
-          </div>
-          <div>
-            <div className="text-xs sm:text-sm font-semibold text-foreground">
-              Include Statistics in Export
-            </div>
-            <div className="text-[11px] sm:text-xs text-muted-foreground mt-0.5">
-              {includeStats
-                ? 'Full report with circle progress & age stats'
-                : 'Clean poster format: calendar grid only'}
-            </div>
-          </div>
-        </div>
-
-        {/* Toggle switch */}
-        <button
-          type="button"
-          role="switch"
-          aria-checked={includeStats}
-          onClick={() => setIncludeStats(!includeStats)}
-          className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background ${
-            includeStats ? 'bg-primary' : 'bg-muted-foreground/30'
-          }`}
-          title={includeStats ? 'Disable statistics in export' : 'Enable statistics in export'}
-        >
-          <span
-            className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-md ring-0 transition duration-200 ease-in-out ${
-              includeStats ? 'translate-x-5' : 'translate-x-0'
-            }`}
-          />
-        </button>
-      </div>
-
       {/* Main Action Buttons */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
         {/* Download Button with Quick Dropdown */}
@@ -142,50 +102,7 @@ const ActionBar: React.FC<ActionBarProps> = ({
               )}
               <span>{isDownloading ? 'Saving...' : 'Download'}</span>
             </button>
-            <button
-              type="button"
-              onClick={() => {
-                setShowDownloadMenu(!showDownloadMenu);
-                setShowPrintMenu(false);
-              }}
-              className="px-2 bg-muted/40 hover:bg-muted text-muted-foreground hover:text-foreground border-l border-border transition-colors flex items-center"
-              title="Download options"
-            >
-              <ChevronDownIcon />
-            </button>
           </div>
-
-          {/* Download Dropdown */}
-          {showDownloadMenu && (
-            <div className="absolute left-0 sm:right-0 top-full mt-1.5 w-56 bg-card border border-border rounded-xl shadow-xl z-30 py-1 text-xs">
-              <button
-                type="button"
-                onClick={() => {
-                  onDownload(true);
-                  setShowDownloadMenu(false);
-                }}
-                className="w-full text-left px-3 py-2 hover:bg-muted flex flex-col gap-0.5 text-card-foreground"
-              >
-                <span className="font-semibold text-foreground flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full bg-blue-500" /> Full Report (with stats)
-                </span>
-                <span className="text-[11px] text-muted-foreground">Includes circular progress & age</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  onDownload(false);
-                  setShowDownloadMenu(false);
-                }}
-                className="w-full text-left px-3 py-2 hover:bg-muted flex flex-col gap-0.5 text-card-foreground border-t border-border/50"
-              >
-                <span className="font-semibold text-foreground flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full bg-emerald-500" /> Calendar Only (minimalist)
-                </span>
-                <span className="text-[11px] text-muted-foreground">Clean life grid poster without stats</span>
-              </button>
-            </div>
-          )}
         </div>
 
 
