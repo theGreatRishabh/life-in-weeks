@@ -162,7 +162,15 @@ const CanvasCalendarGrid: React.FC<{
 
   const { total, cols, unitName, xInterval } = getGridConfig(timeUnit, lifeExpectancy);
   const totalRows = Math.ceil(total / cols);
-  const { cellSize, gap } = ZOOM_CONFIG[zoom];
+  
+  let { cellSize, gap } = ZOOM_CONFIG[zoom];
+  if (timeUnit === 'Months') {
+    cellSize = Math.round(cellSize * 3.5);
+    gap = Math.round(gap * 1.5);
+  } else if (timeUnit === 'Years') {
+    cellSize = Math.round(cellSize * 4.5);
+    gap = Math.round(gap * 2);
+  }
 
   const canvasW = cols * (cellSize + gap) - gap;
   const canvasH = totalRows * (cellSize + gap) - gap;
