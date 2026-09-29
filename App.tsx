@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import { Analytics } from '@vercel/analytics/react';
 import { flushSync } from 'react-dom';
 import DateInput from './components/DateInput';
 import CalendarGrid from './components/CalendarGrid';
@@ -450,6 +451,7 @@ const App: React.FC = () => {
           </main>
         </div>
       </div>
+      <Analytics />
     </>
   );
 };
