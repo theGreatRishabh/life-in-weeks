@@ -174,8 +174,8 @@ const DateInput: React.FC<DateInputProps> = ({
       <div className="grid grid-cols-2 gap-4">
 
         {/* Left — Your Details */}
-        <div className="space-y-3">
-          <div className="flex items-center gap-2">
+        <div className="space-y-2">
+          <div className="flex items-center gap-2 mb-3">
             <span className="p-1 rounded-md bg-primary/10 text-primary">
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
@@ -185,29 +185,33 @@ const DateInput: React.FC<DateInputProps> = ({
             <h2 className="text-sm font-bold text-foreground tracking-tight">Your Details</h2>
           </div>
 
-          <div>
-            <label className="block text-xs font-semibold text-foreground/80 mb-1.5">
-              Date of Birth
-            </label>
-
-            {/* Month — full column width, no truncation */}
-            <div className="relative mb-1.5">
-              <select
-                value={month}
-                onChange={e => setMonth(parseInt(e.target.value, 10))}
-                className={`${sel} appearance-none pr-6 font-medium`}
-                aria-label="Birth Month"
-              >
-                {MONTHS.map((m, i) => (
-                  <option key={m} value={i}>{m}</option>
-                ))}
-              </select>
-              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-1.5 text-muted-foreground">
-                <ChevronDown className="h-3.5 w-3.5" />
-              </div>
+          {/* Row A label */}
+          <label className="block text-xs font-semibold text-foreground/80">
+            Date of Birth
+          </label>
+          {/* Row A input */}
+          <div className="relative">
+            <select
+              value={month}
+              onChange={e => setMonth(parseInt(e.target.value, 10))}
+              className={`${sel} appearance-none pr-6 font-medium`}
+              aria-label="Birth Month"
+            >
+              {MONTHS.map((m, i) => (
+                <option key={m} value={i}>{m}</option>
+              ))}
+            </select>
+            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-1.5 text-muted-foreground">
+              <ChevronDown className="h-3.5 w-3.5" />
             </div>
+          </div>
 
-            {/* Day + Year side by side */}
+          {/* Row B label */}
+          <label className="block text-xs font-semibold text-foreground/80">
+            Day &amp; Year
+          </label>
+          {/* Row B inputs */}
+          <div>
             <div className="grid grid-cols-2 gap-1.5">
               <input
                 type="number"
@@ -229,12 +233,14 @@ const DateInput: React.FC<DateInputProps> = ({
                 className={`${sel} text-center font-medium`}
               />
             </div>
+            {/* Spacer matches the subtext line in the right column */}
+            <p className="text-[11px] text-transparent mt-1 min-h-[16px] select-none">&nbsp;</p>
           </div>
         </div>
 
         {/* Right — Life Expectancy */}
-        <div className="space-y-3">
-          <div className="flex items-center gap-2">
+        <div className="space-y-2">
+          <div className="flex items-center gap-2 mb-3">
             <span className="p-1 rounded-md bg-secondary/10 text-secondary">
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
@@ -244,31 +250,33 @@ const DateInput: React.FC<DateInputProps> = ({
             <h2 className="text-sm font-bold text-foreground tracking-tight">Life Expectancy</h2>
           </div>
 
-          <div>
-            <label htmlFor="based-on" className="block text-xs font-semibold text-foreground/80 mb-1.5">
-              Country Average
-            </label>
-            <div className="relative">
-              <select
-                id="based-on"
-                value={selectedCountry}
-                onChange={handleCountryChange}
-                className={`${sel} appearance-none pr-7 font-medium`}
-              >
-                {countries.map(c => (
-                  <option key={c.id} value={c.id}>{c.name}</option>
-                ))}
-              </select>
-              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-muted-foreground">
-                <ChevronDown />
-              </div>
+          {/* Row A label */}
+          <label htmlFor="based-on" className="block text-xs font-semibold text-foreground/80">
+            Country Average
+          </label>
+          {/* Row A input */}
+          <div className="relative">
+            <select
+              id="based-on"
+              value={selectedCountry}
+              onChange={handleCountryChange}
+              className={`${sel} appearance-none pr-7 font-medium`}
+            >
+              {countries.map(c => (
+                <option key={c.id} value={c.id}>{c.name}</option>
+              ))}
+            </select>
+            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-muted-foreground">
+              <ChevronDown />
             </div>
           </div>
 
+          {/* Row B label */}
+          <label htmlFor="expected-age" className="block text-xs font-semibold text-foreground/80">
+            Target Age (yrs)
+          </label>
+          {/* Row B input */}
           <div>
-            <label htmlFor="expected-age" className="block text-xs font-semibold text-foreground/80 mb-1.5">
-              Target Age (yrs)
-            </label>
             <div className="relative">
               <input
                 id="expected-age"

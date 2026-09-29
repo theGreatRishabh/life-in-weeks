@@ -5,7 +5,7 @@ export interface CountryInfo {
 }
 
 export const POPULAR_COUNTRIES: CountryInfo[] = [
-  { id: 'custom', name: 'Custom Life Expectancy', expectancy: 80.0 },
+  { id: 'custom', name: 'Custom', expectancy: 80.0 },
   { id: 'WLD', name: 'World Average', expectancy: 73.4 },
   { id: 'USA', name: 'United States', expectancy: 77.5 },
   { id: 'GBR', name: 'United Kingdom', expectancy: 81.0 },
