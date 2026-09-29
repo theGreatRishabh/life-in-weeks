@@ -261,56 +261,44 @@ const DateInput: React.FC<DateInputProps> = ({
             <h2 className="text-sm font-bold text-foreground tracking-tight">Your Details</h2>
           </div>
 
-          {/* Row A label */}
-          <label className="block text-xs font-semibold text-foreground/80">
+          <label className="block text-[11px] font-semibold text-foreground/80 mb-1">
             Date of Birth
           </label>
-          {/* Row A input */}
+          <div className="relative">
+            <input
+              type="date"
+              value={`${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`}
+              max={new Date().toISOString().split('T')[0]}
+              onChange={e => {
+                const val = e.target.value;
+                if (val) {
+                  const [y, m, d] = val.split('-');
+                  setYear(parseInt(y, 10));
+                  setMonth(parseInt(m, 10) - 1);
+                  setDay(parseInt(d, 10));
+                }
+              }}
+              className={`${sel} font-medium appearance-none w-full`}
+            />
+          </div>
+
+          <label htmlFor="view-as" className="block text-[11px] font-semibold text-foreground/80 mb-1 mt-4">
+            View Calendar As
+          </label>
           <div className="relative">
             <select
-              value={month}
-              onChange={e => setMonth(parseInt(e.target.value, 10))}
-              className={`${sel} appearance-none pr-6 font-medium`}
-              aria-label="Birth Month"
+              id="view-as"
+              value={timeUnit}
+              onChange={e => setTimeUnit(e.target.value as TimeUnit)}
+              className={`${sel} appearance-none pr-7 font-medium`}
             >
-              {MONTHS.map((m, i) => (
-                <option key={m} value={i}>{m}</option>
-              ))}
+              <option value="Weeks">Weeks (52 per year)</option>
+              <option value="Months">Months (12 per year)</option>
+              <option value="Years">Years (1 per year)</option>
             </select>
             <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-1.5 text-muted-foreground">
               <ChevronDown className="h-3.5 w-3.5" />
             </div>
-          </div>
-
-          {/* Row B label */}
-          <label className="block text-xs font-semibold text-foreground/80">
-            Day &amp; Year
-          </label>
-          {/* Row B inputs */}
-          <div>
-            <div className="grid grid-cols-2 gap-1.5">
-              <input
-                type="number"
-                value={day}
-                onChange={e => setDay(Math.max(1, Math.min(31, parseInt(e.target.value, 10) || 1)))}
-                min="1" max="31"
-                placeholder="Day"
-                aria-label="Birth Day"
-                className={`${sel} text-center font-medium`}
-              />
-              <input
-                type="number"
-                value={year}
-                onChange={e => setYear(parseInt(e.target.value, 10) || new Date().getFullYear())}
-                min="1900"
-                max={new Date().getFullYear()}
-                placeholder="Year"
-                aria-label="Birth Year"
-                className={`${sel} text-center font-medium`}
-              />
-            </div>
-            {/* Spacer matches the subtext line in the right column */}
-            <p className="text-[11px] text-transparent mt-1 min-h-[16px] select-none">&nbsp;</p>
           </div>
         </div>
 
@@ -486,27 +474,7 @@ const DateInput: React.FC<DateInputProps> = ({
         </p>
       </div>
 
-      {/* ── Row 3: View Calendar As — full width ── */}
-      <div>
-        <label htmlFor="view-as" className="block text-xs font-semibold text-foreground/80 mb-1.5">
-          View Calendar As
-        </label>
-        <div className="relative">
-          <select
-            id="view-as"
-            value={timeUnit}
-            onChange={e => setTimeUnit(e.target.value as TimeUnit)}
-            className={`${sel} appearance-none pr-7 font-medium`}
-          >
-            <option value="Weeks">Weeks (52 per year)</option>
-            <option value="Months">Months (12 per year)</option>
-            <option value="Years">Years (1 per year)</option>
-          </select>
-          <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-muted-foreground">
-            <ChevronDown />
-          </div>
-        </div>
-      </div>
+
 
       {/* ── Row 3: Actions ── */}
       <div className="pt-2 border-t border-border">
