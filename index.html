@@ -6,168 +6,22 @@
     <title>Your Life in Weeks - Interactive Life Calendar</title>
     <meta name="description" content="A modern, interactive life calendar to visualize your life in weeks, months, or years. Compare life expectancy and download or print your personalized timeline poster." />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+
+    <!-- Non-blocking font load: preload stylesheet, swap to <link> once loaded -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
+      rel="preload"
+      as="style"
       href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
-      rel="stylesheet"
+      onload="this.rel='stylesheet'"
     />
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-    <script>
-      tailwind.config = {
-        darkMode: 'class',
-        theme: {
-          extend: {
-            fontFamily: {
-              sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
-            },
-            colors: {
-              border: 'hsl(var(--border))',
-              input: 'hsl(var(--input))',
-              ring: 'hsl(var(--ring))',
-              background: 'hsl(var(--background))',
-              foreground: 'hsl(var(--foreground))',
-              primary: {
-                DEFAULT: 'hsl(var(--primary))',
-                foreground: 'hsl(var(--primary-foreground))',
-              },
-              secondary: {
-                DEFAULT: 'hsl(var(--secondary))',
-                foreground: 'hsl(var(--secondary-foreground))',
-              },
-              muted: {
-                DEFAULT: 'hsl(var(--muted))',
-                foreground: 'hsl(var(--muted-foreground))',
-              },
-              accent: {
-                DEFAULT: 'hsl(var(--accent))',
-                foreground: 'hsl(var(--accent-foreground))',
-                present: 'hsl(var(--accent-present))',
-              },
-              card: {
-                DEFAULT: 'hsl(var(--card))',
-                foreground: 'hsl(var(--card-foreground))',
-              },
-            },
-          },
-        },
-      };
-    </script>
-    <style>
-      :root {
-        --background: 240 5.2% 96.1%;
-        --foreground: 240 10% 3.9%;
-        --card: 0 0% 100%;
-        --card-foreground: 240 10% 3.9%;
-        --primary: 221 83% 53%;
-        --primary-foreground: 0 0% 100%;
-        --secondary: 173 96% 39%;
-        --secondary-foreground: 0 0% 100%;
-        --muted: 240 4.8% 95.9%;
-        --muted-foreground: 240 3.8% 46.1%;
-        --accent: 221 83% 53%;
-        --accent-present: 142.1 76.2% 36.3%;
-        --border: 240 5.9% 90%;
-        --ring: 221 83% 53%;
-      }
-
-      .dark {
-        --background: 240 10% 3.9%;
-        --foreground: 0 0% 98%;
-        --card: 240 5.9% 10%;
-        --card-foreground: 0 0% 98%;
-        --primary: 217 91% 65%;
-        --primary-foreground: 240 6% 10%;
-        --secondary: 173 80% 40%;
-        --secondary-foreground: 240 6% 10%;
-        --muted: 240 3.7% 15.9%;
-        --muted-foreground: 240 5% 64.9%;
-        --accent: 217 91% 65%;
-        --accent-present: 142.1 70.6% 45.3%;
-        --border: 240 5% 26.1%;
-        --ring: 217 91% 65%;
-      }
-
-      /* Clean Screen vs Print Media Rules */
-      @media screen {
-        .print-only {
-          display: none !important;
-        }
-      }
-
-      @media print {
-        @page {
-          size: portrait;
-          margin: 6mm 8mm;
-        }
-
-        *, *:before, *:after {
-          -webkit-print-color-adjust: exact !important;
-          print-color-adjust: exact !important;
-          color-adjust: exact !important;
-        }
-
-        html, body {
-          background-color: #ffffff !important;
-          color: #111827 !important;
-          margin: 0 !important;
-          padding: 0 !important;
-          width: 100% !important;
-          height: auto !important;
-          overflow: visible !important;
-        }
-
-        #root {
-          min-height: auto !important;
-          display: block !important;
-        }
-
-        .no-print {
-          display: none !important;
-        }
-
-        .print-only {
-          display: block !important;
-          position: static !important;
-          width: 100% !important;
-          max-width: 100% !important;
-          margin: 0 auto !important;
-          padding: 0 !important;
-          overflow: visible !important;
-        }
-
-        .print-avoid-break {
-          break-inside: avoid !important;
-          page-break-inside: avoid !important;
-        }
-      }
-
-      /* Custom scrollbar styling for compact responsive tables */
-      .scrollbar-thin::-webkit-scrollbar {
-        height: 6px;
-        width: 6px;
-      }
-      .scrollbar-thin::-webkit-scrollbar-track {
-        background: transparent;
-      }
-      .scrollbar-thin::-webkit-scrollbar-thumb {
-        background: hsl(var(--border));
-        border-radius: 9999px;
-      }
-      .scrollbar-thin::-webkit-scrollbar-thumb:hover {
-        background: hsl(var(--muted-foreground) / 0.5);
-      }
-    </style>
-    <script type="importmap">
-    {
-      "imports": {
-        "react/": "https://aistudiocdn.com/react@^19.2.0/",
-        "react": "https://aistudiocdn.com/react@^19.2.0",
-        "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/"
-      }
-    }
-    </script>
+    <noscript>
+      <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet"
+      />
+    </noscript>
   </head>
   <body class="bg-background text-foreground font-sans transition-colors duration-300 antialiased selection:bg-primary/20 selection:text-primary">
     <div id="root" class="min-h-screen flex flex-col"></div>

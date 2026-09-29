@@ -182,7 +182,7 @@ const DateInput: React.FC<DateInputProps> = ({
 
   return (
     <div className="bg-card border border-border rounded-xl shadow-md p-4 sm:p-6 space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-5 sm:gap-6">
+      <div className="grid grid-cols-2 gap-4">
         {/* Your Details */}
         <div className="space-y-3.5">
           <div className="flex items-center gap-2">
@@ -198,29 +198,26 @@ const DateInput: React.FC<DateInputProps> = ({
             <label className="block text-xs font-semibold text-foreground/80 mb-1.5">
               Date of Birth
             </label>
-            <div className="grid grid-cols-3 gap-1.5 sm:gap-2">
-              {/* Month */}
-              <div className="relative">
-                <select
-                  value={month}
-                  onChange={e => setMonth(parseInt(e.target.value, 10))}
-                  className={`${baseInputStyles} appearance-none pr-6 font-medium`}
-                  aria-label="Birth Month"
-                >
-                  {MONTHS.map((m, i) => (
-                    <option key={m} value={i}>
-                      {m.slice(0, 3)}
-                    </option>
-                  ))}
-                </select>
-                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-1.5 text-muted-foreground">
-                  <svg className="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor">
-                    <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
-                  </svg>
-                </div>
+            {/* Month — full width so it never truncates */}
+            <div className="relative mb-1.5">
+              <select
+                value={month}
+                onChange={e => setMonth(parseInt(e.target.value, 10))}
+                className={`${baseInputStyles} appearance-none pr-6 font-medium`}
+                aria-label="Birth Month"
+              >
+                {MONTHS.map((m, i) => (
+                  <option key={m} value={i}>{m}</option>
+                ))}
+              </select>
+              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-1.5 text-muted-foreground">
+                <svg className="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+                </svg>
               </div>
-
-              {/* Day */}
+            </div>
+            {/* Day + Year side by side */}
+            <div className="grid grid-cols-2 gap-1.5">
               <input
                 type="number"
                 value={day}
@@ -228,10 +225,9 @@ const DateInput: React.FC<DateInputProps> = ({
                 min="1"
                 max="31"
                 aria-label="Birth Day"
+                placeholder="Day"
                 className={`${baseInputStyles} text-center font-medium`}
               />
-
-              {/* Year */}
               <input
                 type="number"
                 value={year}
@@ -239,6 +235,7 @@ const DateInput: React.FC<DateInputProps> = ({
                 min="1900"
                 max={new Date().getFullYear()}
                 aria-label="Birth Year"
+                placeholder="Year"
                 className={`${baseInputStyles} text-center font-medium`}
               />
             </div>

@@ -8,6 +8,19 @@ interface TimeUnitBoxProps {
   isPrintVersion?: boolean;
 }
 
+// Static lookup tables — computed once, not on every render
+const SCREEN_STATUS_CLASSES: Record<WeekStatus, string> = {
+  [WeekStatus.Past]: 'bg-accent border-accent/60 hover:brightness-110',
+  [WeekStatus.Present]: 'bg-accent-present border-accent-present animate-pulse ring-2 ring-accent-present/50 z-10',
+  [WeekStatus.Future]: 'bg-muted/40 border-border hover:bg-muted/80',
+};
+
+const PRINT_STATUS_CLASSES: Record<WeekStatus, string> = {
+  [WeekStatus.Past]: 'bg-blue-600 border-blue-700',
+  [WeekStatus.Present]: 'bg-emerald-500 border-emerald-700 ring-1 ring-emerald-600',
+  [WeekStatus.Future]: 'bg-white border-gray-300',
+};
+
 const TimeUnitBox: React.FC<TimeUnitBoxProps> = ({
   status,
   isBeyondLifeExpectancy,
@@ -16,28 +29,15 @@ const TimeUnitBox: React.FC<TimeUnitBoxProps> = ({
 }) => {
   const getStatusStyles = () => {
     if (isPrintVersion) {
-      if (status === WeekStatus.Past) {
-        return 'bg-blue-600 border-blue-700';
-      }
-      if (status === WeekStatus.Present) {
-        return 'bg-emerald-500 border-emerald-700 ring-1 ring-emerald-600';
-      }
-      if (isBeyondLifeExpectancy) {
+      if (isBeyondLifeExpectancy && status === WeekStatus.Future) {
         return 'bg-gray-100 border-gray-300 border-dashed opacity-40';
       }
-      return 'bg-white border-gray-300';
+      return PRINT_STATUS_CLASSES[status];
     }
-
-    if (status === WeekStatus.Past) {
-      return 'bg-accent border-accent/60 hover:brightness-110';
-    }
-    if (status === WeekStatus.Present) {
-      return 'bg-accent-present border-accent-present animate-pulse ring-2 ring-accent-present/50 z-10';
-    }
-    if (isBeyondLifeExpectancy) {
+    if (isBeyondLifeExpectancy && status === WeekStatus.Future) {
       return 'bg-muted/30 border-border/40 border-dashed opacity-50';
     }
-    return 'bg-muted/40 border-border hover:bg-muted/80';
+    return SCREEN_STATUS_CLASSES[status];
   };
 
   return (

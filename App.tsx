@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import { flushSync } from 'react-dom';
 import DateInput from './components/DateInput';
 import CalendarGrid from './components/CalendarGrid';
 import StatsCard from './components/StatsCard';
@@ -7,25 +8,21 @@ import { TimeUnit } from './types';
 import PrintableReport from './components/PrintableReport';
 import Logo from './components/Logo';
 
-declare const html2canvas: any;
+// ─── parse URL params once at module level ──────────────────────────────────
+const _searchParams = new URLSearchParams(window.location.search);
 
 const App: React.FC = () => {
   const [birthDate, setBirthDate] = useState<Date>(() => {
-    const params = new URLSearchParams(window.location.search);
-    const dob = params.get('dob');
+    const dob = _searchParams.get('dob');
     if (dob) {
       const parsed = new Date(dob);
-      if (!isNaN(parsed.getTime())) {
-        return parsed;
-      }
+      if (!isNaN(parsed.getTime())) return parsed;
     }
     try {
       const savedDate = localStorage.getItem('birthDate');
       if (savedDate) {
         const parsedDate = new Date(savedDate);
-        if (!isNaN(parsedDate.getTime())) {
-          return parsedDate;
-        }
+        if (!isNaN(parsedDate.getTime())) return parsedDate;
       }
     } catch {
       // Ignore localStorage errors
@@ -33,30 +30,24 @@ const App: React.FC = () => {
     return new Date(1996, 4, 3);
   });
 
-  const [lifeExpectancy, setLifeExpectancy] = useState<number>(() => {
-    const params = new URLSearchParams(window.location.search);
-    return parseFloat(params.get('le') || '80');
-  });
+  const [lifeExpectancy, setLifeExpectancy] = useState<number>(() =>
+    parseFloat(_searchParams.get('le') || '80')
+  );
 
   const [timeUnit, setTimeUnit] = useState<TimeUnit>(() => {
-    const params = new URLSearchParams(window.location.search);
-    const unit = params.get('unit');
-    if (unit === 'Weeks' || unit === 'Months' || unit === 'Years') {
-      return unit;
-    }
+    const unit = _searchParams.get('unit');
+    if (unit === 'Weeks' || unit === 'Months' || unit === 'Years') return unit;
     return 'Weeks';
   });
 
-  const [selectedCountry, setSelectedCountry] = useState<string>(() => {
-    return new URLSearchParams(window.location.search).get('country') || 'custom';
-  });
+  const [selectedCountry, setSelectedCountry] = useState<string>(
+    () => _searchParams.get('country') || 'custom'
+  );
 
   const [theme, setTheme] = useState<'light' | 'dark'>(() => {
     try {
       const savedTheme = localStorage.getItem('theme');
-      if (savedTheme === 'light' || savedTheme === 'dark') {
-        return savedTheme;
-      }
+      if (savedTheme === 'light' || savedTheme === 'dark') return savedTheme;
     } catch {
       // Ignore localStorage errors
     }
@@ -65,10 +56,13 @@ const App: React.FC = () => {
       : 'light';
   });
 
-  // User preference for export: whether to include stats summary or just calendar
   const [includeStatsInExport, setIncludeStatsInExport] = useState<boolean>(true);
   const [activePrintIncludeStats, setActivePrintIncludeStats] = useState<boolean>(true);
   const [isDownloading, setIsDownloading] = useState<boolean>(false);
+
+  // Controls lazy rendering of the html2canvas capture container.
+  // Null = not downloading; {withStats} = capture in progress.
+  const [pendingExport, setPendingExport] = useState<{ withStats: boolean } | null>(null);
 
   useEffect(() => {
     try {
@@ -91,7 +85,7 @@ const App: React.FC = () => {
     }
   }, [theme]);
 
-  const { years, months, weeks, totalElapsed, totalUnits } = useMemo(() => {
+  const { years, months, weeks, totalElapsed, totalUnits, percentage } = useMemo(() => {
     const now = new Date();
     const birth = new Date(birthDate);
 
@@ -104,7 +98,6 @@ const App: React.FC = () => {
       const daysInPrevMonth = new Date(now.getFullYear(), now.getMonth(), 0).getDate();
       ageDays += daysInPrevMonth;
     }
-
     if (ageMonths < 0) {
       ageYears--;
       ageMonths += 12;
@@ -116,9 +109,7 @@ const App: React.FC = () => {
 
     let totalElapsedMonths =
       (now.getFullYear() - birth.getFullYear()) * 12 + (now.getMonth() - birth.getMonth());
-    if (now.getDate() < birth.getDate()) {
-      totalElapsedMonths--;
-    }
+    if (now.getDate() < birth.getDate()) totalElapsedMonths--;
     totalElapsedMonths = Math.max(0, totalElapsedMonths);
 
     const totalElapsedYears = Math.max(0, ageYears);
@@ -126,79 +117,86 @@ const App: React.FC = () => {
     const totalMonths = Math.ceil(lifeExpectancy * 12);
     const totalYears = Math.ceil(lifeExpectancy);
 
+    let elapsed: number;
+    let units: number;
     switch (timeUnit) {
       case 'Months':
-        return {
-          years: ageYears,
-          months: ageMonths,
-          weeks: ageWeeks,
-          totalElapsed: totalElapsedMonths,
-          totalUnits: totalMonths,
-        };
+        elapsed = totalElapsedMonths;
+        units = totalMonths;
+        break;
       case 'Years':
-        return {
-          years: ageYears,
-          months: ageMonths,
-          weeks: ageWeeks,
-          totalElapsed: totalElapsedYears,
-          totalUnits: totalYears,
-        };
+        elapsed = totalElapsedYears;
+        units = totalYears;
+        break;
       case 'Weeks':
       default:
-        return {
-          years: ageYears,
-          months: ageMonths,
-          weeks: ageWeeks,
-          totalElapsed: totalElapsedWeeks,
-          totalUnits: totalWeeks,
-        };
+        elapsed = totalElapsedWeeks;
+        units = totalWeeks;
     }
+
+    return {
+      years: ageYears,
+      months: ageMonths,
+      weeks: ageWeeks,
+      totalElapsed: elapsed,
+      totalUnits: units,
+      percentage: units > 0 ? (elapsed / units) * 100 : 0,
+    };
   }, [birthDate, lifeExpectancy, timeUnit]);
 
-  const percentage = totalUnits > 0 ? (totalElapsed / totalUnits) * 100 : 0;
-
-  // Handle Download with option to include or exclude stats
+  // ─── Download: lazy-render export container, capture via dynamic import ──
   const handleDownload = useCallback(
     (withStats: boolean = includeStatsInExport) => {
       setIsDownloading(true);
-      const targetId = withStats ? 'export-content-with-stats' : 'export-content-calendar-only';
-      const element = document.getElementById(targetId);
-
-      if (element && typeof html2canvas !== 'undefined') {
-        html2canvas(element, {
-          backgroundColor: '#ffffff',
-          scale: 2, // High resolution retina capture
-          useCORS: true,
-          logging: false,
-        })
-          .then((canvas: HTMLCanvasElement) => {
-            const link = document.createElement('a');
-            const suffix = withStats ? 'report' : 'calendar-only';
-            link.download = `your-life-in-${timeUnit.toLowerCase()}-${suffix}.png`;
-            link.href = canvas.toDataURL('image/png');
-            link.click();
-          })
-          .catch((err: any) => {
-            console.error('Error rendering image', err);
-          })
-          .finally(() => {
-            setIsDownloading(false);
-          });
-      } else {
-        setIsDownloading(false);
-      }
+      setPendingExport({ withStats });
     },
-    [includeStatsInExport, timeUnit]
+    [includeStatsInExport]
   );
 
-  // Handle Print with option to include or exclude stats
+  // Fires after the pending export container mounts in the DOM
+  useEffect(() => {
+    if (!pendingExport) return;
+
+    const targetId = pendingExport.withStats
+      ? 'export-content-with-stats'
+      : 'export-content-calendar-only';
+    const element = document.getElementById(targetId);
+    if (!element) {
+      setIsDownloading(false);
+      setPendingExport(null);
+      return;
+    }
+
+    // Dynamically import html2canvas — only downloaded on first use
+    import('html2canvas').then(({ default: html2canvas }) => {
+      html2canvas(element, {
+        backgroundColor: '#ffffff',
+        scale: 2,
+        useCORS: true,
+        logging: false,
+      })
+        .then((canvas: HTMLCanvasElement) => {
+          const link = document.createElement('a');
+          const suffix = pendingExport.withStats ? 'report' : 'calendar-only';
+          link.download = `your-life-in-${timeUnit.toLowerCase()}-${suffix}.png`;
+          link.href = canvas.toDataURL('image/png');
+          link.click();
+        })
+        .catch((err: unknown) => {
+          console.error('Error rendering image', err);
+        })
+        .finally(() => {
+          setPendingExport(null);
+          setIsDownloading(false);
+        });
+    });
+  }, [pendingExport, timeUnit]);
+
+  // ─── Print: flushSync ensures state propagates before dialog opens ────────
   const handlePrint = useCallback(
     (withStats: boolean = includeStatsInExport) => {
-      setActivePrintIncludeStats(withStats);
-      // Allow state to propagate before opening native print dialog
-      setTimeout(() => {
-        window.print();
-      }, 50);
+      flushSync(() => setActivePrintIncludeStats(withStats));
+      window.print();
     },
     [includeStatsInExport]
   );
@@ -224,44 +222,31 @@ const App: React.FC = () => {
       </div>
 
       {/* ============================================================== */}
-      {/* 2. OFF-SCREEN CAPTURE CONTAINERS (For html2canvas image downloads) */}
+      {/* 2. OFF-SCREEN CAPTURE CONTAINER — only rendered during download */}
       {/* ============================================================== */}
-      <div
-        id="export-canvas-container"
-        className="fixed -left-[99999px] top-0 pointer-events-none select-none"
-        aria-hidden="true"
-      >
-        <div id="export-content-with-stats">
-          <PrintableReport
-            timeUnit={timeUnit}
-            birthDate={birthDate}
-            years={years}
-            months={months}
-            weeks={weeks}
-            totalElapsed={totalElapsed}
-            totalUnits={totalUnits}
-            lifeExpectancy={lifeExpectancy}
-            percentage={percentage}
-            includeStats={true}
-            isForExportCanvas={true}
-          />
+      {pendingExport && (
+        <div
+          id="export-canvas-container"
+          className="fixed -left-[99999px] top-0 pointer-events-none select-none"
+          aria-hidden="true"
+        >
+          <div id={pendingExport.withStats ? 'export-content-with-stats' : 'export-content-calendar-only'}>
+            <PrintableReport
+              timeUnit={timeUnit}
+              birthDate={birthDate}
+              years={years}
+              months={months}
+              weeks={weeks}
+              totalElapsed={totalElapsed}
+              totalUnits={totalUnits}
+              lifeExpectancy={lifeExpectancy}
+              percentage={percentage}
+              includeStats={pendingExport.withStats}
+              isForExportCanvas={true}
+            />
+          </div>
         </div>
-        <div id="export-content-calendar-only">
-          <PrintableReport
-            timeUnit={timeUnit}
-            birthDate={birthDate}
-            years={years}
-            months={months}
-            weeks={weeks}
-            totalElapsed={totalElapsed}
-            totalUnits={totalUnits}
-            lifeExpectancy={lifeExpectancy}
-            percentage={percentage}
-            includeStats={false}
-            isForExportCanvas={true}
-          />
-        </div>
-      </div>
+      )}
 
       {/* ============================================================== */}
       {/* 3. ON-SCREEN RESPONSIVE APPLICATION UI                         */}
